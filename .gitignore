@@ -1,0 +1,19 @@
+# --- Environment ---
+.env
+
+# --- Dependency folders (fallback, falls einzeln fehlen) ---
+node_modules/
+
+# --- System / Editor Files ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Workspace build cache (optional, z. B. Turborepo/Nx) ---
+.cache/
+.tmp/
