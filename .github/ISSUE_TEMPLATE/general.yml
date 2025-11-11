@@ -1,0 +1,31 @@
+name: 🧩 Issue
+description: Kurzes, sauberes Template für Bugs, Features oder Tasks
+title: "[Kurzer Titel]"
+labels: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 🧠 Beschreibung
+      placeholder: "Was ist das Problem oder Ziel?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 🎯 Erwartetes Verhalten / Ziel
+      placeholder: "Was soll passieren bzw. erreicht werden?"
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: ✅ To-Dos / Schritte
+      description: Liste der Umsetzungsschritte
+      value: "- [ ] "
+  
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📎 Notizen
+      placeholder: "Optional: zusätzliche Infos, Links oder Kontext"
