@@ -2,6 +2,7 @@ import { useTodos } from "../hooks/useTodos";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WidgetLayout } from "@/components/layout/WidgetLayout";
+import MaxIcon from "@/assets/icons/maximize.svg?react"; 
 
 export function TodoWidget() {
   const { todos, loading } = useTodos();
@@ -20,7 +21,7 @@ export function TodoWidget() {
           variant="outline"
           onClick={() => navigate("/todos")}
         >
-          Öffnen
+          <MaxIcon className="w-5 h-5 text-gray-500"/>
         </Button>
       }
     >

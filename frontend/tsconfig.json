@@ -5,9 +5,8 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+    "types": ["vite/client"],
+    "baseUrl": "./src"
+  },
+  "include": ["src"]
 }
