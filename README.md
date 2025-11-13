@@ -37,7 +37,7 @@ orga-tool/
 │
 ├── frontend/ # React + TypeScript (Vite)
 │ ├── src/
-│ │ ├── features/
+│ │ ├── components/
 │ │ ├── services/
 │ │ └── App.tsx
 │ ├── vite.config.ts
