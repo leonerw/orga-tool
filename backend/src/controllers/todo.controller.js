@@ -11,7 +11,7 @@ export const getTodos = async (req, res) => {
 
 export const createTodo = async (req, res) => {
     try {
-        const newTodo = Todo.create(req.body);
+        const newTodo = await Todo.create(req.body);
         res.status(201).json(newTodo);
     } catch (error) {
         res.status(400).json({ message: 'Error creating todo', error });
