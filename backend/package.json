@@ -2,7 +2,8 @@
   "name": "backend",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/main.js"
+    "dev": "nodemon src/main.js",
+    "build": "node --check src/main.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
