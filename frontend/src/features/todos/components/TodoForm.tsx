@@ -9,7 +9,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"; // falls vorhanden
+import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group";
 import { InputGroupAddon, InputGroupText } from "@/components/ui/input-group";
 import { useState } from "react";
 
@@ -64,7 +64,7 @@ export function TodoForm({ onAdd }: Props) {
                     aria-invalid={fieldState.invalid}
                     placeholder="Titel eingeben"
                   />
-                  <FieldDescription>Kurzer, prägnanter Titel für dein Todo.</FieldDescription>
+                  <FieldDescription>Kurzer Titel für dein Todo.</FieldDescription>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}

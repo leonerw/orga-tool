@@ -28,7 +28,7 @@ export function TodoWidget() {
       <p className="text-base">
         {openTodos.length > 0
           ? `${openTodos.length} offene ${openTodos.length === 1 ? "Aufgabe" : "Aufgaben"}`
-          : "Alle Aufgaben erledigt 🎉"}
+          : "Alle Aufgaben erledigt!"}
       </p>
     </WidgetLayout>
   );

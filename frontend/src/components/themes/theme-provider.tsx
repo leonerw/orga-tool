@@ -58,4 +58,4 @@ export function ThemeProvider({
   );
 }
 
-export { ThemeProviderContext }; // 👈 Context separat exportieren
+export { ThemeProviderContext };
