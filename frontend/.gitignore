@@ -9,8 +9,17 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-ts
 dist-ssr
 *.local
+
+# TypeScript build info
+*.tsbuildinfo
+
+
+# Vite / TS generated
+vite.config.d.ts
+vite.config.js
 
 # Editor directories and files
 .vscode/*
