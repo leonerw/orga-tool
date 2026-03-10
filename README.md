@@ -1,61 +1,62 @@
-# 🗂️ Orga Tool
+# Orga Tool
 
-Ein persönliches Organisations-Tool mit modularer Architektur.  
-Das Ziel ist, nach und nach verschiedene Funktionen zu integrieren — z. B. **To-Do-Liste**, **Kalender**, **Einkaufsliste**, **Notizen** und mehr.
+Ein persoenliches Organisations-Tool mit modularer Architektur.  
+Das Ziel ist, nach und nach verschiedene Funktionen zu integrieren - z. B. **To-Do-Liste**, **Kalender**, **Einkaufsliste**, **Notizen** und mehr.
 
 Dieses Projekt ist als **Full-Stack-Monorepo** aufgebaut:
 
 - **Backend:** Node.js + Express + MongoDB (REST-API)  
 - **Frontend:** React (Vite + TypeScript)  
-- **Ziel:** Erweiterbare, saubere Basis für spätere Features oder native Apps
+- **Ziel:** Erweiterbare, saubere Basis fuer spaetere Features oder native Apps
 
 ---
 
-## 🚀 Features
+## Features
 
-| Status ✅,🛠️,❌ | Feature | Beschreibung |
+| Status | Feature | Beschreibung |
 |:------:|----------|---------------|
-| 🛠️ | **To-Do-Liste (CRUD)** | Aufgaben anlegen, bearbeiten, löschen, abhaken |
-| 🛠️ | **User-Login & Registrierung (JWT)** | Benutzerverwaltung mit Tokens |
-| ❌ | **Kalenderintegration** | Todo |
-| ❌ | **Einkaufsliste** | Todo |
-| ❌ | **Mobile App** | Todo |
+| In Arbeit | **To-Do-Liste (CRUD)** | Aufgaben anlegen, bearbeiten, loeschen, abhaken |
+| In Arbeit | **User-Login & Registrierung (JWT)** | Benutzerverwaltung mit Tokens |
+| Offen | **Kalenderintegration** | Todo |
+| Offen | **Einkaufsliste** | Todo |
+| Offen | **Mobile App** | Todo |
 
 ---
 
-## 🧱 Architektur
-```
+## Architektur
+
+```text
 orga-tool/
-├── backend/ # Express + MongoDB (API)
-│ ├── src/
-│ │ ├── models/
-│ │ ├── controllers/
-│ │ ├── routes/
-│ │ └── main.js
-│ ├── .env
-│ └── package.json
-│
-├── frontend/ # React + TypeScript (Vite)
-│ ├── src/
-│ │ ├── components/
-│ │ ├── services/
-│ │ └── App.tsx
-│ ├── vite.config.ts
-│ └── package.json
-│
-├── .gitignore
-├── package.json # Monorepo-Steuerung (Workspaces)
-└── README.md
+|-- backend/ # Express + MongoDB (API)
+|   |-- src/
+|   |   |-- models/
+|   |   |-- controllers/
+|   |   |-- routes/
+|   |   `-- main.js
+|   |-- .env
+|   `-- package.json
+|
+|-- frontend/ # React + TypeScript (Vite)
+|   |-- src/
+|   |   |-- components/
+|   |   |-- services/
+|   |   `-- App.tsx
+|   |-- vite.config.ts
+|   `-- package.json
+|
+|-- .gitignore
+|-- package.json # Monorepo-Steuerung (Workspaces)
+`-- README.md
 ```
----
 
+---
 
 - **Monorepo** mit getrenntem Frontend & Backend  
-- Beide Projekte können gemeinsam mit `npm run dev` gestartet werden
+- Beide Projekte koennen gemeinsam mit `npm run dev` gestartet werden
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 | Bereich | Technologie |
 |----------|-------------|
@@ -64,40 +65,56 @@ orga-tool/
 | **Datenbank** | MongoDB (lokal oder Atlas) |
 | **Dev Tools** | Nodemon, concurrently |
 | **Auth (geplant)** | JWT |
-| **Deployment (später)** | Render / Railway / Vercel |
+| **Deployment (spaeter)** | Render / Railway / Vercel |
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
-### 1️⃣ Projekt klonen
+### 1. Projekt klonen
+
 ```bash
-git clone https://github.com/<dein-benutzername>/orga-tool.git
+git clone https://github.com/leonerw/orga-tool.git
 cd orga-tool
 ```
 
-### 2️⃣ Abhängigkeiten installieren
+### 2. Abhaengigkeiten installieren
+
 ```bash
 npm install
 npm install --prefix backend
 npm install --prefix frontend
 ```
 
-### 3️⃣ .env-Dateien anlegen
+### 3. .env-Dateien anlegen
 
 backend/.env
+
 ```env
 PORT=
 MONGO_URI=
 ```
 
-
 frontend/.env
+
 ```env
 VITE_API_URL=
 ```
 
-### 4️⃣ Entwicklung starten
+### 4. Entwicklung starten
+
 ```bash
 npm run dev
+```
+
+### 5. Backend-Tests ausfuehren
+
+```bash
+npm test --prefix backend
+```
+
+### 6. Backend-Test-Coverage ausfuehren
+
+```bash
+npm run test:coverage --prefix backend
 ```
