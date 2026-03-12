@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getTodos, createTodo, updateTodo, deleteTodo } from "../src/controllers/todo.controller.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTodo, deleteTodo, getTodos, updateTodo } from "../src/controllers/todo.controller.js";
 import Todo from "../src/models/todo.model.js";
 
 vi.mock("../src/models/todo.model.js", () => ({
@@ -10,6 +10,8 @@ vi.mock("../src/models/todo.model.js", () => ({
     findByIdAndDelete: vi.fn(),
   },
 }));
+
+const validId = "507f191e810c19729de860ea";
 
 const mockRes = () => {
   const res = {};
@@ -40,56 +42,94 @@ describe("todo.controller", () => {
 
   it("handles getTodos failures", async () => {
     const res = mockRes();
-    const error = new Error("db down");
-    const sort = vi.fn().mockRejectedValue(error);
+    const sort = vi.fn().mockRejectedValue(new Error("db down"));
     Todo.find.mockReturnValue({ sort });
 
     await getTodos({}, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: "Error fetching todos", error });
+    expect(res.json).toHaveBeenCalledWith({ message: "Error fetching todos" });
   });
 
-  it("creates a todo and returns 201", async () => {
+  it("creates a todo and forwards only allowed fields", async () => {
     const res = mockRes();
-    const req = { body: { title: "title", description: "desc" } };
-    const created = { id: "123", ...req.body, completed: false };
+    const req = {
+      body: {
+        title: "title",
+        description: "desc",
+        completed: false,
+        ignored: "x",
+      },
+    };
+    const created = { id: validId, title: "title", description: "desc", completed: false };
     Todo.create.mockResolvedValue(created);
 
     await createTodo(req, res);
 
-    expect(Todo.create).toHaveBeenCalledWith(req.body);
+    expect(Todo.create).toHaveBeenCalledWith({
+      title: "title",
+      description: "desc",
+      completed: false,
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
   });
 
-  it("handles create errors", async () => {
+  it("handles create errors without exposing internals", async () => {
     const res = mockRes();
     const req = { body: {} };
-    const error = new Error("validation");
-    Todo.create.mockRejectedValue(error);
+    Todo.create.mockRejectedValue(new Error("validation"));
 
     await createTodo(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: "Error creating todo", error });
+    expect(res.json).toHaveBeenCalledWith({ message: "Error creating todo" });
   });
 
-  it("updates an existing todo", async () => {
+  it("updates an existing todo with validators and allowed fields", async () => {
     const res = mockRes();
-    const req = { params: { id: "123" }, body: { completed: true } };
-    const updated = { id: req.params.id, completed: true };
+    const req = {
+      params: { id: validId },
+      body: { completed: true, ignored: "x" },
+    };
+    const updated = { id: validId, completed: true };
     Todo.findByIdAndUpdate.mockResolvedValue(updated);
 
     await updateTodo(req, res);
 
-    expect(Todo.findByIdAndUpdate).toHaveBeenCalledWith(req.params.id, req.body, { new: true });
+    expect(Todo.findByIdAndUpdate).toHaveBeenCalledWith(
+      validId,
+      { completed: true },
+      { new: true, runValidators: true }
+    );
     expect(res.json).toHaveBeenCalledWith(updated);
+  });
+
+  it("returns 400 for invalid update id", async () => {
+    const res = mockRes();
+    const req = { params: { id: "invalid-id" }, body: { completed: true } };
+
+    await updateTodo(req, res);
+
+    expect(Todo.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Invalid todo id" });
+  });
+
+  it("returns 400 when no valid update fields are provided", async () => {
+    const res = mockRes();
+    const req = { params: { id: validId }, body: { ignored: true } };
+
+    await updateTodo(req, res);
+
+    expect(Todo.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "No valid fields provided for update" });
   });
 
   it("returns 404 when updating a missing todo", async () => {
     const res = mockRes();
-    const req = { params: { id: "missing" }, body: { completed: true } };
+    const req = { params: { id: validId }, body: { completed: true } };
     Todo.findByIdAndUpdate.mockResolvedValue(null);
 
     await updateTodo(req, res);
@@ -98,32 +138,42 @@ describe("todo.controller", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "Todo not found" });
   });
 
-  it("handles update errors", async () => {
+  it("handles update errors without exposing internals", async () => {
     const res = mockRes();
-    const req = { params: { id: "123" }, body: { completed: true } };
-    const error = new Error("update failed");
-    Todo.findByIdAndUpdate.mockRejectedValue(error);
+    const req = { params: { id: validId }, body: { completed: true } };
+    Todo.findByIdAndUpdate.mockRejectedValue(new Error("update failed"));
 
     await updateTodo(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: "Error updating todo", error });
+    expect(res.json).toHaveBeenCalledWith({ message: "Error updating todo" });
   });
 
   it("deletes an existing todo", async () => {
     const res = mockRes();
-    const req = { params: { id: "123" } };
-    Todo.findByIdAndDelete.mockResolvedValue({ id: req.params.id });
+    const req = { params: { id: validId } };
+    Todo.findByIdAndDelete.mockResolvedValue({ id: validId });
 
     await deleteTodo(req, res);
 
-    expect(Todo.findByIdAndDelete).toHaveBeenCalledWith(req.params.id);
+    expect(Todo.findByIdAndDelete).toHaveBeenCalledWith(validId);
     expect(res.json).toHaveBeenCalledWith({ message: "Todo deleted successfully" });
+  });
+
+  it("returns 400 for invalid delete id", async () => {
+    const res = mockRes();
+    const req = { params: { id: "invalid-id" } };
+
+    await deleteTodo(req, res);
+
+    expect(Todo.findByIdAndDelete).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Invalid todo id" });
   });
 
   it("returns 404 when deleting a missing todo", async () => {
     const res = mockRes();
-    const req = { params: { id: "missing" } };
+    const req = { params: { id: validId } };
     Todo.findByIdAndDelete.mockResolvedValue(null);
 
     await deleteTodo(req, res);
@@ -132,15 +182,14 @@ describe("todo.controller", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "Todo not found" });
   });
 
-  it("handles delete errors", async () => {
+  it("handles delete errors without exposing internals", async () => {
     const res = mockRes();
-    const req = { params: { id: "123" } };
-    const error = new Error("delete failed");
-    Todo.findByIdAndDelete.mockRejectedValue(error);
+    const req = { params: { id: validId } };
+    Todo.findByIdAndDelete.mockRejectedValue(new Error("delete failed"));
 
     await deleteTodo(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: "Error deleting todo", error });
+    expect(res.json).toHaveBeenCalledWith({ message: "Error deleting todo" });
   });
 });

@@ -40,6 +40,17 @@ describe("Todo API integration", () => {
     expect(res.body._id).toBeDefined();
   });
 
+  it("creates a todo while ignoring unknown fields", async () => {
+    const res = await request(app)
+      .post("/api/todos")
+      .send({ title: "A task", description: "desc", ignored: "x" })
+      .expect(201);
+
+    expect(res.body.title).toBe("A task");
+    expect(res.body.description).toBe("desc");
+    expect(res.body.ignored).toBeUndefined();
+  });
+
   it("validates required fields on create", async () => {
     const res = await request(app)
       .post("/api/todos")
@@ -47,6 +58,7 @@ describe("Todo API integration", () => {
       .expect(400);
 
     expect(res.body.message).toBe("Error creating todo");
+    expect(res.body.error).toBeUndefined();
   });
 
   it("lists todos sorted by newest first", async () => {
@@ -66,18 +78,55 @@ describe("Todo API integration", () => {
     expect(res.body[1].title).toBe("First");
   });
 
-  it("updates an existing todo", async () => {
+  it("updates an existing todo and ignores unknown update fields", async () => {
     const created = await request(app)
       .post("/api/todos")
       .send({ title: "Todo", description: "desc" });
 
     const res = await request(app)
       .put(`/api/todos/${created.body._id}`)
-      .send({ completed: true })
+      .send({ completed: true, ignored: "x" })
       .expect(200);
 
     expect(created.body.completed).toBe(false);
     expect(res.body.completed).toBe(true);
+    expect(res.body.ignored).toBeUndefined();
+  });
+
+  it("returns 400 when update id format is invalid", async () => {
+    const res = await request(app)
+      .put("/api/todos/not-a-valid-id")
+      .send({ completed: true })
+      .expect(400);
+
+    expect(res.body.message).toBe("Invalid todo id");
+  });
+
+  it("returns 400 when no valid update fields are provided", async () => {
+    const created = await request(app)
+      .post("/api/todos")
+      .send({ title: "Todo", description: "desc" });
+
+    const res = await request(app)
+      .put(`/api/todos/${created.body._id}`)
+      .send({ ignored: true })
+      .expect(400);
+
+    expect(res.body.message).toBe("No valid fields provided for update");
+  });
+
+  it("returns 400 when update validation fails", async () => {
+    const created = await request(app)
+      .post("/api/todos")
+      .send({ title: "Todo", description: "desc" });
+
+    const res = await request(app)
+      .put(`/api/todos/${created.body._id}`)
+      .send({ title: "" })
+      .expect(400);
+
+    expect(res.body.message).toBe("Error updating todo");
+    expect(res.body.error).toBeUndefined();
   });
 
   it("returns 404 when updating missing todo", async () => {
@@ -98,6 +147,14 @@ describe("Todo API integration", () => {
 
     const list = await request(app).get("/api/todos").expect(200);
     expect(list.body).toHaveLength(0);
+  });
+
+  it("returns 400 when delete id format is invalid", async () => {
+    const res = await request(app)
+      .delete("/api/todos/not-a-valid-id")
+      .expect(400);
+
+    expect(res.body.message).toBe("Invalid todo id");
   });
 
   it("returns 404 when deleting missing todo", async () => {
