@@ -1,45 +1,79 @@
-import Todo from '../models/todo.model.js';
+import mongoose from "mongoose";
+import Todo from "../models/todo.model.js";
+
+const allowedTodoFields = new Set(["title", "description", "completed"]);
+
+const pickAllowedTodoFields = (payload = {}) =>
+  Object.fromEntries(
+    Object.entries(payload).filter(([key]) => allowedTodoFields.has(key))
+  );
+
+const isInvalidObjectId = (id) => !mongoose.Types.ObjectId.isValid(id);
+
+const sendError = (res, status, message) => {
+  res.status(status).json({ message });
+};
 
 export const getTodos = async (req, res) => {
-    try {
-        const todos = await Todo.find().sort({ createdAt: -1 });
-        res.json(todos);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching todos', error });
-    }
+  try {
+    const todos = await Todo.find().sort({ createdAt: -1 });
+    res.json(todos);
+  } catch {
+    sendError(res, 500, "Error fetching todos");
+  }
 };
 
 export const createTodo = async (req, res) => {
-    try {
-        const newTodo = await Todo.create(req.body);
-        res.status(201).json(newTodo);
-    } catch (error) {
-        res.status(400).json({ message: 'Error creating todo', error });
-    }
+  try {
+    const payload = pickAllowedTodoFields(req.body);
+    const newTodo = await Todo.create(payload);
+    res.status(201).json(newTodo);
+  } catch {
+    sendError(res, 400, "Error creating todo");
+  }
 };
 
 export const updateTodo = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, { new: true });
-        if (!updatedTodo) {
-            return res.status(404).json({ message: 'Todo not found' });
-        }
-        res.json(updatedTodo);
-    } catch (error) {
-        res.status(400).json({ message: 'Error updating todo', error });
+  try {
+    const { id } = req.params;
+    if (isInvalidObjectId(id)) {
+      return sendError(res, 400, "Invalid todo id");
     }
+
+    const updates = pickAllowedTodoFields(req.body);
+    if (Object.keys(updates).length === 0) {
+      return sendError(res, 400, "No valid fields provided for update");
+    }
+
+    const updatedTodo = await Todo.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedTodo) {
+      return sendError(res, 404, "Todo not found");
+    }
+
+    res.json(updatedTodo);
+  } catch {
+    sendError(res, 400, "Error updating todo");
+  }
 };
 
 export const deleteTodo = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deletedTodo = await Todo.findByIdAndDelete(id);
-        if (!deletedTodo) {
-            return res.status(404).json({ message: 'Todo not found' });
-        }
-        res.json({ message: 'Todo deleted successfully' });
-    } catch (error) {
-        res.status(400).json({ message: 'Error deleting todo', error });
+  try {
+    const { id } = req.params;
+    if (isInvalidObjectId(id)) {
+      return sendError(res, 400, "Invalid todo id");
     }
+
+    const deletedTodo = await Todo.findByIdAndDelete(id);
+    if (!deletedTodo) {
+      return sendError(res, 404, "Todo not found");
+    }
+
+    res.json({ message: "Todo deleted successfully" });
+  } catch {
+    sendError(res, 400, "Error deleting todo");
+  }
 };
