@@ -47,12 +47,20 @@ function parseLoginBody(body) {
   return { email, password, rememberMe };
 }
 
-async function createSessionAndTokens({ user, rememberMe, req, res }) {
+async function createSessionAndTokens({ user, rememberMe, req, res, fixedExpiresAt = null }) {
   const accessToken = signAccessToken(user);
   const refreshToken = generateRefreshToken();
   const refreshTokenHash = hashRefreshToken(refreshToken);
+
   const ttlMs = getRefreshTtlMs(rememberMe);
-  const expiresAt = new Date(Date.now() + ttlMs);
+  const now = Date.now();
+  const expiresAt = fixedExpiresAt ? new Date(fixedExpiresAt) : new Date(now + ttlMs);
+
+  // For refresh rotation, cookie must only live until original fixed expiry.
+  const cookieMaxAgeMs = fixedExpiresAt
+    ? Math.max(1, expiresAt.getTime() - now)
+    : ttlMs;
+
   const meta = getClientMeta(req);
 
   await AuthSession.create({
@@ -65,10 +73,11 @@ async function createSessionAndTokens({ user, rememberMe, req, res }) {
     ip: meta.ip,
   });
 
-  setRefreshTokenCookie(res, refreshToken, ttlMs);
+  setRefreshTokenCookie(res, refreshToken, cookieMaxAgeMs);
 
   return { accessToken };
 }
+
 
 export async function register(req, res) {
   try {
@@ -171,6 +180,7 @@ export async function refresh(req, res) {
       rememberMe: session.rememberMe,
       req,
       res,
+      fixedExpiresAt: session.expiresAt,
     });
 
     return res.json({

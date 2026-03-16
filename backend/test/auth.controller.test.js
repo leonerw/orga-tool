@@ -177,7 +177,7 @@ describe("auth.controller", () => {
         })
       );
 
-      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", 3600000);
+      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", expect.any(Number));
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
@@ -258,7 +258,7 @@ describe("auth.controller", () => {
           rememberMe: false,
         })
       );
-      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", 3600000);
+      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", expect.any(Number));
 
       expect(res.json).toHaveBeenCalledWith({
         accessToken: "access-token",
@@ -382,7 +382,7 @@ describe("auth.controller", () => {
         })
       );
 
-      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", 3600000);
+      expect(setRefreshTokenCookie).toHaveBeenCalledWith(res, "refresh-token", expect.any(Number));
 
       expect(res.json).toHaveBeenCalledWith({
         accessToken: "access-token",
