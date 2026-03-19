@@ -697,6 +697,18 @@ describe("auth.controller", () => {
       expect(res.json).toHaveBeenCalledWith({ message: "Email is already verified" });
     });
 
+    it("returns 401 when user is not found", async () => {
+      User.findById.mockResolvedValue(null);
+
+      const req = mockReq({ auth: { userId } });
+      const res = mockRes();
+
+      await resendVerificationEmail(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: "User not found" });
+    });
+
     it("sends verification email for unverified user", async () => {
       User.findById.mockResolvedValue(makeUser());
       const { sendVerificationEmail } = await import("../src/utils/email.js");
@@ -746,6 +758,18 @@ describe("auth.controller", () => {
       expect(res.status).toHaveBeenCalledWith(401);
     });
 
+    it("returns 401 when user does not have 2FA enabled", async () => {
+      User.findById.mockResolvedValue(makeUser({ twoFactorEnabled: false }));
+
+      const req = mockReq({ body: { pendingToken: "valid-pending", code: "123456" } });
+      const res = mockRes();
+
+      await loginWithTwoFactor(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: "Invalid session" });
+    });
+
     it("returns 401 when TOTP code is wrong", async () => {
       User.findById.mockResolvedValue(makeUser({ twoFactorEnabled: true, twoFactorSecret: "SECRET" }));
       verifyTotpCode.mockReturnValue(false);
@@ -782,6 +806,27 @@ describe("auth.controller", () => {
   // ─── recoverWithBackupCode ────────────────────────────────────────────────────
 
   describe("recoverWithBackupCode", () => {
+    it("returns 400 when fields are missing", async () => {
+      const req = mockReq({ body: {} });
+      const res = mockRes();
+
+      await recoverWithBackupCode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: "Pending token and backup code are required" });
+    });
+
+    it("returns 401 when pending token is invalid", async () => {
+      verifyTwoFactorPendingToken.mockImplementation(() => { throw new Error("bad token"); });
+
+      const req = mockReq({ body: { pendingToken: "bad", backupCode: "abcdef12" } });
+      const res = mockRes();
+
+      await recoverWithBackupCode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+    });
+
     it("returns 401 when backup code is not in the list", async () => {
       const userObj = makeUser({ twoFactorEnabled: true, backupCodeHashes: ["other-hash"] });
       User.findById.mockResolvedValue(userObj);

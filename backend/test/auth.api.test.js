@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import { TOTP, Secret } from "otpauth";
 import { createApp } from "../src/app.js";
 import { signEmailVerifyToken } from "../src/utils/auth.js";
 
@@ -249,5 +250,91 @@ describe("Auth API integration", () => {
     await request(app)
       .get("/api/auth/verify-email?token=totallyinvalidtoken")
       .expect(400);
+  });
+
+  // ─── 2FA full flow ────────────────────────────────────────────────────────────
+
+  it("completes full 2FA setup and login flow", async () => {
+    // 1. Register
+    const registerRes = await request(app).post("/api/auth/register").send({
+      email: "alice@example.com",
+      password: "Password123",
+      displayName: "Alice",
+      rememberMe: false,
+    }).expect(201);
+
+    const accessToken = registerRes.body.accessToken;
+
+    // 2. Setup 2FA — returns secret + QR code
+    const setupRes = await request(app)
+      .post("/api/auth/2fa/setup")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(typeof setupRes.body.secret).toBe("string");
+    expect(typeof setupRes.body.qrCodeDataUrl).toBe("string");
+
+    // 3. Confirm 2FA with a valid code generated from the returned secret
+    const totp = new TOTP({ secret: Secret.fromBase32(setupRes.body.secret), digits: 6, period: 30, algorithm: "SHA1" });
+    const confirmRes = await request(app)
+      .post("/api/auth/2fa/confirm")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ code: totp.generate() })
+      .expect(200);
+
+    expect(confirmRes.body.backupCodes).toHaveLength(10);
+
+    // 4. Login now returns otp_required instead of tokens
+    const loginRes = await request(app).post("/api/auth/login").send({
+      email: "alice@example.com",
+      password: "Password123",
+      rememberMe: false,
+    }).expect(200);
+
+    expect(loginRes.body.step).toBe("otp_required");
+    expect(typeof loginRes.body.pendingToken).toBe("string");
+
+    // 5. Complete login with a fresh TOTP code
+    const twoFaRes = await request(app).post("/api/auth/2fa/login").send({
+      pendingToken: loginRes.body.pendingToken,
+      code: totp.generate(),
+    }).expect(200);
+
+    expect(typeof twoFaRes.body.accessToken).toBe("string");
+    expect(twoFaRes.body.user.twoFactorEnabled).toBe(true);
+  });
+
+  it("rejects 2FA login with invalid TOTP code", async () => {
+    const registerRes = await request(app).post("/api/auth/register").send({
+      email: "alice@example.com",
+      password: "Password123",
+      displayName: "Alice",
+      rememberMe: false,
+    }).expect(201);
+
+    const accessToken = registerRes.body.accessToken;
+
+    const setupRes = await request(app)
+      .post("/api/auth/2fa/setup")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .expect(200);
+
+    const totp = new TOTP({ secret: Secret.fromBase32(setupRes.body.secret), digits: 6, period: 30, algorithm: "SHA1" });
+    await request(app)
+      .post("/api/auth/2fa/confirm")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ code: totp.generate() })
+      .expect(200);
+
+    const loginRes = await request(app).post("/api/auth/login").send({
+      email: "alice@example.com",
+      password: "Password123",
+      rememberMe: false,
+    }).expect(200);
+
+    await request(app).post("/api/auth/2fa/login").send({
+      pendingToken: loginRes.body.pendingToken,
+      code: "000000",
+    }).expect(401);
   });
 });

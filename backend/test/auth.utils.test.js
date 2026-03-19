@@ -3,10 +3,15 @@ import {
   comparePassword,
   generateRefreshToken,
   getRefreshTtlMs,
+  hashBackupCode,
   hashPassword,
   hashRefreshToken,
   signAccessToken,
+  signEmailVerifyToken,
+  signTwoFactorPendingToken,
   verifyAccessToken,
+  verifyEmailVerifyToken,
+  verifyTwoFactorPendingToken,
 } from "../src/utils/auth.js";
 
 describe("auth utils", () => {
@@ -82,5 +87,73 @@ describe("auth utils", () => {
 
     expect(getRefreshTtlMs(true)).toBe(30 * 24 * 60 * 60 * 1000);
     expect(getRefreshTtlMs(false)).toBe(1 * 24 * 60 * 60 * 1000);
+  });
+
+  // ─── email verify token ───────────────────────────────────────────────────────
+
+  it("signs and verifies email verify token", () => {
+    vi.stubEnv("EMAIL_VERIFY_SECRET", "email-secret");
+
+    const token = signEmailVerifyToken("user-123");
+    const payload = verifyEmailVerifyToken(token);
+
+    expect(payload.sub).toBe("user-123");
+    expect(payload.type).toBe("email_verify");
+  });
+
+  it("throws when verifyEmailVerifyToken receives a token of the wrong type", () => {
+    vi.stubEnv("EMAIL_VERIFY_SECRET", "shared-secret");
+    vi.stubEnv("TWO_FACTOR_PENDING_SECRET", "shared-secret");
+
+    // sign a 2fa_pending token and try to use it as an email verify token
+    const token = signTwoFactorPendingToken("user-123", false);
+    expect(() => verifyEmailVerifyToken(token)).toThrow("Invalid token type");
+  });
+
+  it("throws when EMAIL_VERIFY_SECRET is missing", () => {
+    vi.stubEnv("EMAIL_VERIFY_SECRET", "");
+    expect(() => signEmailVerifyToken("user-123")).toThrow("EMAIL_VERIFY_SECRET is not configured");
+  });
+
+  // ─── 2FA pending token ────────────────────────────────────────────────────────
+
+  it("signs and verifies 2FA pending token, preserving rememberMe", () => {
+    vi.stubEnv("TWO_FACTOR_PENDING_SECRET", "2fa-secret");
+
+    const token = signTwoFactorPendingToken("user-123", true);
+    const payload = verifyTwoFactorPendingToken(token);
+
+    expect(payload.sub).toBe("user-123");
+    expect(payload.type).toBe("2fa_pending");
+    expect(payload.rememberMe).toBe(true);
+  });
+
+  it("throws when verifyTwoFactorPendingToken receives a token of the wrong type", () => {
+    vi.stubEnv("EMAIL_VERIFY_SECRET", "shared-secret");
+    vi.stubEnv("TWO_FACTOR_PENDING_SECRET", "shared-secret");
+
+    // sign an email_verify token and try to use it as a 2fa_pending token
+    const token = signEmailVerifyToken("user-123");
+    expect(() => verifyTwoFactorPendingToken(token)).toThrow("Invalid token type");
+  });
+
+  it("throws when TWO_FACTOR_PENDING_SECRET is missing", () => {
+    vi.stubEnv("TWO_FACTOR_PENDING_SECRET", "");
+    expect(() => signTwoFactorPendingToken("user-123", false)).toThrow("TWO_FACTOR_PENDING_SECRET is not configured");
+  });
+
+  // ─── hashBackupCode ───────────────────────────────────────────────────────────
+
+  it("hashes backup codes deterministically as SHA-256", () => {
+    const hash1 = hashBackupCode("mybackupcode");
+    const hash2 = hashBackupCode("mybackupcode");
+
+    expect(hash1).toBe(hash2);
+    expect(hash1).not.toBe("mybackupcode");
+    expect(hash1).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("produces different hashes for different backup codes", () => {
+    expect(hashBackupCode("code1")).not.toBe(hashBackupCode("code2"));
   });
 });
