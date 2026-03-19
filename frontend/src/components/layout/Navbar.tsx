@@ -62,6 +62,10 @@ export function Navbar() {
                   <DropdownMenuItem disabled>
                     {user?.displayName} ({user?.email})
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account">Account settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();

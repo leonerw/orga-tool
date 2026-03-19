@@ -2,10 +2,50 @@ import { useEffect, useRef, useState } from "react";
 import GridLayout from "react-grid-layout";
 import { TodoWidget } from "../../todos/components/TodoWidget";
 import { TestWidget } from "../../testfeature/components/TestWidget";
+import { useAuth } from "@/auth/context/useAuth";
+import { resendVerificationEmail } from "@/auth/api/auth";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+function EmailVerificationBanner() {
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  async function handleResend() {
+    setSending(true);
+    try {
+      await resendVerificationEmail();
+      setSent(true);
+    } catch {
+      // fail silently — user can try again
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950 px-4 py-3 text-sm">
+      <span className="text-yellow-800 dark:text-yellow-200">
+        Please verify your email address to secure your account.
+      </span>
+      {sent ? (
+        <span className="text-yellow-700 dark:text-yellow-300 font-medium shrink-0">Sent!</span>
+      ) : (
+        <button
+          onClick={handleResend}
+          disabled={sending}
+          className="shrink-0 font-medium underline text-yellow-800 dark:text-yellow-200 disabled:opacity-50"
+        >
+          {sending ? "Sending..." : "Resend email"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function DashboardPage() {
+  const { user } = useAuth();
+
   const layout = [
     { i: "todos", x: 0, y: 0, w: 6, h: 3 },
     { i: "test1", x: 0, y: 3, w: 3, h: 3 },
@@ -36,6 +76,8 @@ export function DashboardPage() {
 
   return (
     <div className="py-8">
+      {user && !user.emailVerified && <EmailVerificationBanner />}
+
       <div ref={wrapRef} className="w-full">
         {width > 0 && (
           <GridLayout

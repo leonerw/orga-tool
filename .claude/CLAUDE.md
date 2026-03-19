@@ -8,6 +8,7 @@ Before doing anything else, read these files to understand the project state:
 - `.claude/context/project.md` — stack, goals, constraints
 - `.claude/context/architecture.md` — key design decisions
 - `.claude/context/conventions.md` — code style and patterns
+- `.claude/context/auth.md` — auth system deep-dive (load when touching auth, sessions, or protected routes)
 
 If context files are empty or missing, ask the user to fill in `project.md` first.
 

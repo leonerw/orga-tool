@@ -19,6 +19,22 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    twoFactorSecret: {
+      type: String,
+      default: null,
+    },
+    backupCodeHashes: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

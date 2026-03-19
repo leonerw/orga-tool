@@ -2,14 +2,16 @@ import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "./layout/MainLayout";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { TodoPage } from "@/features/todos/pages/TodoPage";
+import { AccountPage } from "@/features/account/pages/AccountPage";
 import { LoginPage } from "@/auth/pages/LoginPage";
 import { RegisterPage } from "@/auth/pages/RegisterPage";
+import { VerifyEmailPage } from "@/auth/pages/VerifyEmailPage";
 import { RequireAuth } from "@/auth/components/RequireAuth";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />, // hier ist <Outlet />
+    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -21,13 +23,22 @@ export const router = createBrowserRouter([
       },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
-      { 
-        path: "todos", 
+      { path: "verify-email", element: <VerifyEmailPage /> },
+      {
+        path: "todos",
         element: (
           <RequireAuth>
             <TodoPage />
           </RequireAuth>
-        )
+        ),
+      },
+      {
+        path: "account",
+        element: (
+          <RequireAuth>
+            <AccountPage />
+          </RequireAuth>
+        ),
       },
     ],
   },
