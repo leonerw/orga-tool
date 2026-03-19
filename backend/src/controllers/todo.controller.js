@@ -16,7 +16,7 @@ const sendError = (res, status, message) => {
 
 export const getTodos = async (req, res) => {
   try {
-    const todos = await Todo.find().sort({ createdAt: -1 });
+    const todos = await Todo.find({ owner: req.auth.userId }).sort({ createdAt: -1 });
     res.json(todos);
   } catch {
     sendError(res, 500, "Error fetching todos");
@@ -26,7 +26,7 @@ export const getTodos = async (req, res) => {
 export const createTodo = async (req, res) => {
   try {
     const payload = pickAllowedTodoFields(req.body);
-    const newTodo = await Todo.create(payload);
+    const newTodo = await Todo.create({ ...payload, owner: req.auth.userId });
     res.status(201).json(newTodo);
   } catch {
     sendError(res, 400, "Error creating todo");
@@ -45,10 +45,11 @@ export const updateTodo = async (req, res) => {
       return sendError(res, 400, "No valid fields provided for update");
     }
 
-    const updatedTodo = await Todo.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedTodo = await Todo.findOneAndUpdate(
+      { _id: id, owner: req.auth.userId },
+      updates,
+      { new: true, runValidators: true }
+    );
 
     if (!updatedTodo) {
       return sendError(res, 404, "Todo not found");
@@ -67,7 +68,7 @@ export const deleteTodo = async (req, res) => {
       return sendError(res, 400, "Invalid todo id");
     }
 
-    const deletedTodo = await Todo.findByIdAndDelete(id);
+    const deletedTodo = await Todo.findOneAndDelete({ _id: id, owner: req.auth.userId });
     if (!deletedTodo) {
       return sendError(res, 404, "Todo not found");
     }
