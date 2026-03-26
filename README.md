@@ -12,9 +12,9 @@ The app itself is a modular personal dashboard. Features are added incrementally
 | Done | Two-factor authentication (TOTP) |
 | Done | Email verification & password change |
 | Done | Todo CRUD (create, read, update, delete) |
-| Done | Dashboard with drag-and-drop widget grid |
+| Done | Dashboard with widget grid |
+| WIP | Drag-and-drop dashboard customization |
 | Done | Dark / light mode |
-| WIP | — |
 
 ## Tech Stack
 
