@@ -13,7 +13,7 @@ export function useTodos() {
         const data = await getTodos();
         setTodos(data);
       } catch {
-        setError("Fehler beim Laden der Todos");
+        setError("Failed to load todos");
       } finally {
         setLoading(false);
       }

@@ -7,6 +7,8 @@ import {
   verifyTotpCode,
 } from "../utils/totp.js";
 
+// --- Setup flow ---
+
 export async function setupTwoFactor(req, res) {
   try {
     const user = await User.findById(req.auth.userId);
@@ -67,6 +69,8 @@ export async function confirmTwoFactor(req, res) {
     return res.status(500).json({ message: "Error confirming 2FA" });
   }
 }
+
+// --- Disable ---
 
 export async function disableTwoFactor(req, res) {
   try {

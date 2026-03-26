@@ -43,7 +43,7 @@ export function Navbar() {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
               {isBootstrapping ? (
@@ -54,7 +54,7 @@ export function Navbar() {
                     <Link to="/login">Login</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/register">Registrieren</Link>
+                    <Link to="/register">Register</Link>
                   </DropdownMenuItem>
                 </>
               ) : (

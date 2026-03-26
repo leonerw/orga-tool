@@ -21,6 +21,8 @@ import {
 import { sendVerificationEmail } from "../utils/email.js";
 import { verifyTotpCode } from "../utils/totp.js";
 
+// --- Private helpers ---
+
 const sanitizeUser = (user) => ({
   id: user._id.toString(),
   email: user.email,
@@ -55,6 +57,11 @@ function parseLoginBody(body) {
   return { email, password, rememberMe };
 }
 
+// --- Session factory ---
+// Creates an AuthSession in the DB, issues a refresh token cookie, and returns
+// a signed access token. Pass fixedExpiresAt during token rotation to preserve
+// the original session expiry rather than extending it.
+
 async function createSessionAndTokens({ user, rememberMe, req, res, fixedExpiresAt = null }) {
   const accessToken = signAccessToken(user);
   const refreshToken = generateRefreshToken();
@@ -86,6 +93,7 @@ async function createSessionAndTokens({ user, rememberMe, req, res, fixedExpires
   return { accessToken };
 }
 
+// --- Registration and login ---
 
 export async function register(req, res) {
   try {
@@ -165,6 +173,8 @@ export async function login(req, res) {
   }
 }
 
+// --- Session lifecycle ---
+
 export async function refresh(req, res) {
   try {
     const incomingToken = req.cookies?.[REFRESH_COOKIE_NAME];
@@ -243,6 +253,8 @@ export async function logout(req, res) {
   }
 }
 
+// --- Current user ---
+
 export async function me(req, res) {
   try {
     const user = await User.findById(req.auth.userId);
@@ -256,6 +268,8 @@ export async function me(req, res) {
     return res.status(500).json({ message: "Error fetching user" });
   }
 }
+
+// --- Password ---
 
 export async function changePassword(req, res) {
   try {
@@ -305,6 +319,8 @@ export async function changePassword(req, res) {
   }
 }
 
+// --- Email verification ---
+
 export async function verifyEmail(req, res) {
   try {
     const { token } = req.query;
@@ -340,6 +356,10 @@ export async function resendVerificationEmail(req, res) {
     return res.status(500).json({ message: "Error sending verification email" });
   }
 }
+
+// --- 2FA login flow ---
+// These endpoints are public — they are called before a session exists.
+// Both require a short-lived pendingToken issued by login() after password verification.
 
 export async function loginWithTwoFactor(req, res) {
   try {

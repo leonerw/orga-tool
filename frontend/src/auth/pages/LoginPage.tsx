@@ -8,6 +8,7 @@ export function LoginPage() {
     const navigate = useNavigate();
     const { login, verifyOtp, recoverWithBackupCode } = useAuth();
 
+    // --- State ---
     const [step, setStep] = useState<LoginStep>("credentials");
     const [pendingToken, setPendingToken] = useState("");
 
@@ -19,6 +20,8 @@ export function LoginPage() {
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    // --- Event handlers ---
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -66,6 +69,10 @@ export function LoginPage() {
             setLoading(false);
         }
     }
+
+    // --- Render ---
+    // Each login step renders a separate form. Early returns keep the logic flat
+    // rather than nesting all three forms in a single render block.
 
     if (step === "otp") {
         return (

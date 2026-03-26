@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Todo from "../models/todo.model.js";
 
+// --- Helpers ---
+
 const allowedTodoFields = new Set(["title", "description", "completed"]);
 
 const pickAllowedTodoFields = (payload = {}) =>
@@ -13,6 +15,8 @@ const isInvalidObjectId = (id) => !mongoose.Types.ObjectId.isValid(id);
 const sendError = (res, status, message) => {
   res.status(status).json({ message });
 };
+
+// --- CRUD handlers ---
 
 export const getTodos = async (req, res) => {
   try {

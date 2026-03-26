@@ -5,7 +5,6 @@ import { WidgetLayout } from "@/components/layout/WidgetLayout";
 export function TestWidget() {
   const navigate = useNavigate();
 
-
   return (
     <WidgetLayout
       title="TestWidget"
@@ -16,7 +15,7 @@ export function TestWidget() {
           variant="outline"
           onClick={() => navigate("/todos")}
         >
-          Öffnen
+          Open
         </Button>
       }
     >

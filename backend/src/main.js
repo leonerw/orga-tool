@@ -6,7 +6,6 @@ dotenv.config();
 const app = createApp();
 const PORT = process.env.PORT;
 
-// DB verbinden
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");

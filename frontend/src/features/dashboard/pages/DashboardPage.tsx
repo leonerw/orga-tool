@@ -7,6 +7,8 @@ import { resendVerificationEmail } from "@/auth/api/auth";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+// --- Sub-components ---
+
 function EmailVerificationBanner() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -43,15 +45,20 @@ function EmailVerificationBanner() {
   );
 }
 
+// --- Layout config ---
+
+const layout = [
+  { i: "todos", x: 0, y: 0, w: 6, h: 3 },
+  { i: "test1", x: 0, y: 3, w: 3, h: 3 },
+  { i: "test2", x: 3, y: 3, w: 3, h: 3 },
+];
+
 export function DashboardPage() {
   const { user } = useAuth();
 
-  const layout = [
-    { i: "todos", x: 0, y: 0, w: 6, h: 3 },
-    { i: "test1", x: 0, y: 3, w: 3, h: 3 },
-    { i: "test2", x: 3, y: 3, w: 3, h: 3 },
-  ];
-
+  // --- Grid width tracking ---
+  // GridLayout requires an explicit pixel width. ResizeObserver keeps it
+  // in sync whenever the container is resized.
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
 

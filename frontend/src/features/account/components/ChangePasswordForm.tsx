@@ -13,12 +13,15 @@ interface FormValues {
 }
 
 export function ChangePasswordForm() {
+    // --- State ---
     const [success, setSuccess] = useState(false);
     const [serverError, setServerError] = useState<string | null>(null);
 
     const form = useForm<FormValues>({
         defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
     });
+
+    // --- Handlers ---
 
     async function onSubmit(data: FormValues) {
         setServerError(null);
