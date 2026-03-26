@@ -1,6 +1,8 @@
 # Orga Tool
 
-A modular personal dashboard application. Features are added incrementally as self-contained modules — todos, calendar, notes, shopping lists, and more.
+A personal learning project built to practice full-stack web development following real-world best practices — covering auth, API design, frontend architecture, testing, and CI/CD.
+
+The app itself is a modular personal dashboard. Features are added incrementally as self-contained modules — todos, calendar, notes, shopping lists, and more.
 
 ## Features
 
