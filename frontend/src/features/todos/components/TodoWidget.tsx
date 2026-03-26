@@ -13,7 +13,7 @@ export function TodoWidget() {
   return (
     <WidgetLayout
       title="Todos"
-      description="Deine offenen Aufgaben"
+      description="Your open tasks"
       loading={loading}
       actions={
         <Button
@@ -27,8 +27,8 @@ export function TodoWidget() {
     >
       <p className="text-base">
         {openTodos.length > 0
-          ? `${openTodos.length} offene ${openTodos.length === 1 ? "Aufgabe" : "Aufgaben"}`
-          : "Alle Aufgaben erledigt!"}
+          ? `${openTodos.length} open ${openTodos.length === 1 ? "task" : "tasks"}`
+          : "All tasks completed!"}
       </p>
     </WidgetLayout>
   );

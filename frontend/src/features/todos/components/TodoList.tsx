@@ -20,14 +20,13 @@ interface Props {
 export function TodoList({ todos, onToggle, onDelete }: Props) {
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  // Empty state
   if (todos.length === 0) {
     return (
       <Card className="w-full flex flex-col transition-all hover:shadow-md">
         <CardHeader className="space-y-0 pb-2">
-          <CardTitle className="text-lg">Keine Todos</CardTitle>
+          <CardTitle className="text-lg">No todos</CardTitle>
           <CardDescription>
-            Füge rechts ein neues Todo hinzu.
+            Add a new todo on the right.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -37,9 +36,9 @@ export function TodoList({ todos, onToggle, onDelete }: Props) {
   return (
     <Card className="w-full flex flex-col transition-all hover:shadow-md">
       <CardHeader className="space-y-0 pb-2">
-        <CardTitle className="text-lg">Deine Todos</CardTitle>
+        <CardTitle className="text-lg">Your todos</CardTitle>
         <CardDescription>
-          Übersicht deiner offenen und erledigten Aufgaben
+          Overview of your open and completed tasks.
         </CardDescription>
       </CardHeader>
 
@@ -84,7 +83,7 @@ export function TodoList({ todos, onToggle, onDelete }: Props) {
                   size="sm"
                   onClick={async () => {
                     setDeleting(todo._id);
-                    await new Promise((r) => setTimeout(r, 200));
+                    await new Promise((r) => setTimeout(r, 200)); // brief visual feedback before removal
                     onDelete(todo._id);
                     setDeleting(null);
                   }}

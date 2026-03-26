@@ -8,7 +8,7 @@ interface WidgetLayoutProps {
   actions?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
-  /** Optional: macht den Inhaltsbereich scrollbar */
+  /** When true, the content area becomes vertically scrollable. */
   scrollable?: boolean;
 }
 
@@ -49,7 +49,7 @@ export function WidgetLayout({
         )}
       >
         {loading ? (
-          <p className="text-sm text-muted-foreground">Lade...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         ) : (
           children
         )}

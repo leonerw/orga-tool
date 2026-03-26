@@ -10,6 +10,8 @@ type SetupStep = "idle" | "scan" | "confirm" | "backup" | "disable";
 
 export function TwoFactorSetup() {
     const { user, refreshUser } = useAuth();
+
+    // --- State ---
     const [setupStep, setSetupStep] = useState<SetupStep>("idle");
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
     const [secret, setSecret] = useState("");
@@ -20,6 +22,8 @@ export function TwoFactorSetup() {
     const [loading, setLoading] = useState(false);
 
     const isEnabled = user?.twoFactorEnabled ?? false;
+
+    // --- Handlers ---
 
     async function handleStartSetup() {
         setError(null);
@@ -68,7 +72,10 @@ export function TwoFactorSetup() {
         }
     }
 
-    // --- Disable flow ---
+    // --- Render ---
+    // Each step renders a separate card. Early returns keep the logic flat.
+
+    // --- Render: disable ---
     if (setupStep === "disable") {
         return (
             <Card>
@@ -106,7 +113,7 @@ export function TwoFactorSetup() {
         );
     }
 
-    // --- Backup codes display (shown once after confirming setup) ---
+    // --- Render: backup codes ---
     if (setupStep === "backup") {
         return (
             <Card>
@@ -132,7 +139,7 @@ export function TwoFactorSetup() {
         );
     }
 
-    // --- Scan QR code step ---
+    // --- Render: scan QR ---
     if (setupStep === "scan") {
         return (
             <Card>
@@ -182,7 +189,7 @@ export function TwoFactorSetup() {
         );
     }
 
-    // --- Default: 2FA status card ---
+    // --- Render: status ---
     return (
         <Card>
             <CardHeader>

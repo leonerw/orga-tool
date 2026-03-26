@@ -9,6 +9,8 @@ import { requireAuth } from "./middleware/require-auth.js";
 
 dotenv.config();
 
+// --- Rate limiters ---
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -25,9 +27,12 @@ const refreshLimiter = rateLimit({
   message: { message: "Too many attempts, please try again later" },
 });
 
+// --- App factory ---
+
 export function createApp() {
   const app = express();
 
+  // Middleware
   app.use(
     cors({
       origin: process.env.FRONTEND_URL,
@@ -46,6 +51,7 @@ export function createApp() {
     app.post("/api/auth/2fa/recover", authLimiter);
   }
 
+  // Routes
   app.use("/api/auth", authRoutes);
   app.use("/api/todos", requireAuth, todoRoutes);
 

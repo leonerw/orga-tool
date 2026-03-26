@@ -9,8 +9,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group";
-import { InputGroupAddon, InputGroupText } from "@/components/ui/input-group";
+import { InputGroup, InputGroupTextarea, InputGroupAddon, InputGroupText } from "@/components/ui/input-group";
 import { useState } from "react";
 
 interface TodoFormValues {
@@ -23,6 +22,7 @@ interface Props {
 }
 
 export function TodoForm({ onAdd }: Props) {
+  // --- State ---
   const form = useForm<TodoFormValues>({
     defaultValues: {
       title: "",
@@ -31,6 +31,8 @@ export function TodoForm({ onAdd }: Props) {
   });
 
   const [charCount, setCharCount] = useState(0);
+
+  // --- Handlers ---
 
   const onSubmit = (data: TodoFormValues) => {
     if (!data.title.trim()) return;
@@ -42,48 +44,46 @@ export function TodoForm({ onAdd }: Props) {
   return (
     <Card className="w-full lg:w-[380px] flex flex-col transition-all hover:shadow-md">
       <CardHeader className="space-y-0 pb-2">
-        <CardTitle className="text-lg">Neues Todo</CardTitle>
-        <CardDescription>Erstelle eine neue Aufgabe mit Titel und Beschreibung.</CardDescription>
+        <CardTitle className="text-lg">New Todo</CardTitle>
+        <CardDescription>Create a new task with a title and description.</CardDescription>
       </CardHeader>
 
       <CardContent>
         <form id="todo-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            {/* Titel */}
             <Controller
               name="title"
               control={form.control}
-              rules={{ required: "Bitte einen Titel eingeben" }}
+              rules={{ required: "Please enter a title" }}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="todo-title">Titel</FieldLabel>
+                  <FieldLabel htmlFor="todo-title">Title</FieldLabel>
                   <Input
                     {...field}
                     id="todo-title"
                     autoComplete="off"
                     aria-invalid={fieldState.invalid}
-                    placeholder="Titel eingeben"
+                    placeholder="Enter title"
                   />
-                  <FieldDescription>Kurzer Titel für dein Todo.</FieldDescription>
+                  <FieldDescription>A short title for your todo.</FieldDescription>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
 
-            {/* Beschreibung */}
             <Controller
               name="description"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="todo-description">Beschreibung</FieldLabel>
+                  <FieldLabel htmlFor="todo-description">Description</FieldLabel>
 
                   <InputGroup>
                     <InputGroupTextarea
                       {...field}
                       id="todo-description"
                       rows={4}
-                      placeholder="Beschreibung (optional)"
+                      placeholder="Description (optional)"
                       className="resize-none"
                       aria-invalid={fieldState.invalid}
                       onChange={(e) => {
@@ -99,7 +99,7 @@ export function TodoForm({ onAdd }: Props) {
                   </InputGroup>
 
                   <FieldDescription>
-                    Optional: Weitere Details oder Schritte zur Aufgabe.
+                    Optional: additional details or steps for the task.
                   </FieldDescription>
 
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -113,10 +113,10 @@ export function TodoForm({ onAdd }: Props) {
       <CardFooter>
         <Field orientation="horizontal" className="justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Zurücksetzen
+            Reset
           </Button>
           <Button type="submit" form="todo-form">
-            Hinzufügen
+            Add
           </Button>
         </Field>
       </CardFooter>

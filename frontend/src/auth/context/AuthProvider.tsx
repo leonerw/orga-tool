@@ -14,7 +14,9 @@ import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { AuthContext } from "./AuthContext";
 
 
-
+// Module-level singleton so concurrent refresh calls (e.g. multiple parallel
+// requests all returning 401) share a single in-flight refresh rather than
+// each triggering their own.
 let sharedRefreshPromise: Promise<ReturnType<typeof refreshSession> extends Promise<infer T> ? T : never> | null = null;
 
 function refreshSessionOnce() {
@@ -26,12 +28,16 @@ function refreshSessionOnce() {
   return sharedRefreshPromise;
 }
 
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+    // --- State ---
     const [user, setUser] = useState<AuthUser | null>(null);
     const [accessToken, setToken] = useState<string | null>(null);
     const [isBootstrapping, setBootstrapping] = useState(true);
 
+    // --- Session bootstrap ---
+    // On mount, attempt a silent refresh to restore an existing session.
+    // isBootstrapping stays true until this resolves so RequireAuth doesn't
+    // flash a redirect before the session is known.
     useEffect(() => {
         (async () => {
             try {
@@ -49,6 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })();
     }, []);
 
+    // --- 401 interceptor ---
+    // Catches 401 responses from any non-auth endpoint, silently refreshes the
+    // session, and retries the original request once. Ejected on unmount.
     useEffect(() => {
         let refreshPromise: Promise<string | null> | null = null;
 
@@ -117,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
+    // --- Auth actions ---
 
     async function login(payload: LoginPayload): Promise<TwoFactorChallenge | void> {
         const data = await loginApi(payload);
@@ -164,6 +174,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await me();
         setUser(data.user);
     }
+
+    // --- Context value ---
 
     const value = useMemo(() => ({
         user,
